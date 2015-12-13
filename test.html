@@ -1,0 +1,20 @@
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="rtm.js"></script>
+<script>
+// create a real-time-mongo instance
+rtm = new RTM("ws://taiiwo.tk:12345/");
+// listen for documents
+rtm.listen(
+    "messages",   // collection
+    ["test", "supersecretkey"], // my pair
+    [["Taiiwo", "supersecretkey"],],   // recipient's pairs
+    function(data){   // callback runs for all documents returned, and for
+        console.log(data);   // each new document added
+    }
+);
+
+// You can also do
+$(rtm).on('eachDocument', function(document){
+    // just an example
+});
+</script>
