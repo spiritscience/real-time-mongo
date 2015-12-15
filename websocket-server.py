@@ -45,16 +45,17 @@ def handle_client(websocket, path):
                 yield from websocket.send("Invalid request: Invalid recipient")
                 continue
             # this for loop bocks, so nothing after it will be executed.
-            for message in stream:
-                # each message must be tagged as 'visible'.
-                # This is so we don't accidentally give info to the user
-                if message['visible']:
-                    data = {
-                        "sender": message['sender'],
-                        "recipient": message['recipient'],
-                        "message": message['data']
-                    }
-                    yield from websocket.send(json.dumps(data))
+            while 1:
+                for message in stream:
+                    # each message must be tagged as 'visible'.
+                    # This is so we don't accidentally give info to the user
+                    if message['visible']:
+                        data = {
+                            "sender": message['sender'],
+                            "recipient": message['recipient'],
+                            "message": message['data']
+                        }
+                        yield from websocket.send(json.dumps(data))
 
 logger = logging.getLogger('websockets')
 logger.setLevel(logging.INFO)

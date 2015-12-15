@@ -20,7 +20,7 @@ class RTM:
     def stream(self, query, collection):
         stream = self.util.db[collection].find(
             query,
-            cursor_type=pymongo.cursor.CursorType.TAILABLE_AWAIT
+            cursor_type=pymongo.cursor.CursorType.TAILABLE
         )
         return stream if stream else False
 
