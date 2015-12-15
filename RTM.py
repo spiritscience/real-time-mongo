@@ -35,7 +35,8 @@ class RTM:
     # Adds a recipient (returns that recipient's ID)
     def add_recipient(self, pub, password):
         # don't create duplicate users
-        if self.util.db.recipients.find_one({"pub": pub}): return False
+        if self.util.db.recipients.find_one({"pub": pub.lower()}):
+            return False
         return self.util.db.recipients.insert({
             "pub": pub.lower(),
             "priv": self.util.sha512(password)
