@@ -53,7 +53,8 @@ def handle_client(websocket, path):
                         data = {
                             "sender": message['sender'],
                             "recipient": message['recipient'],
-                            "message": message['data']
+                            "message": message['data'],
+                            "ts": message['ts']
                         }
                         yield from websocket.send(json.dumps(data))
 
