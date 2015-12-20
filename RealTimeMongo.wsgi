@@ -1,4 +1,4 @@
 import sys, os
-sys.path.insert (0,'/home/taiiwo/wwwphantas.ml/real-time-mongo')
-os.chdir("/home/taiiwo/wwwphantas.ml/real-time-mongo")
+sys.path.insert (0,'/var/gpol/real-time-mongo')
+os.chdir("/var/gpol/real-time-mongo")
 from FlaskApi import app as application
