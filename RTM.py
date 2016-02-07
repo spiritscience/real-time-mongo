@@ -1,8 +1,11 @@
 import pymongo
 import util
 import time
+import websockets
+import asyncio
 
-class RTM:
+# Class representing the mongodb connection
+class MongoConnection:
     util = util.Util()
 
     # Stores information in the specified collection
@@ -71,7 +74,7 @@ class RTM:
     # see. Note: By "being the recipients", that could either mean that you
     # were the individual recipient, or that you were the a member of that
     # channel or group etc.
-    def receive_stream(self, sender_pair, recipient_pairs, collection):
+    def message_stream(self, sender_pair, recipient_pairs, collection):
         # convert passwords into private keys
         recipient_pubs = []
         recipient_privs = []
@@ -111,3 +114,54 @@ class RTM:
             collection
         )
 
+# Class representing the websocket server
+# [host]: desired host of the websocket server
+# [port]: desired port of the websocket server
+class WSServer:
+    def __init__(self, port=5678, host="0.0.0.0", debug=False):
+        # store the handler for what happens after we hear something
+        self.port = port
+        self.host = host
+        self.handler_threads = []
+        self.debug = debug
+
+    # Adds asyncio threads for passing the websocket to
+    # handler: a function that will be run inside the thread where the first
+    #          argument will be a websocket
+    def add_handler(self, handler):
+        self.handler_threads.append(handler)
+
+    # private debug function
+    def _debug(self, msg):
+        if self.debug:
+            print(msg)
+
+    # Sets up and starts the websocket server
+    def start(self):
+        self._debug("Starting server")
+        # scopeless version of self
+        this = self
+        # A handler function that represents the event loop
+        @asyncio.coroutine
+        def handler(websocket, path):
+            self._debug("Got client: " + str(websocket.remote_address))
+            while True:
+                # on each new loop
+                tasks = []
+                for task in this.handler_threads:
+                    tasks.append(asyncio.async(
+                        task(websocket)
+                    ))
+                # Blocking method that takes a list of thread ids
+                # and yields a tuple when any one is finished. The first item
+                # is a list of done thread ids, and the other is a list of
+                # thread ids that have not finished yet
+                done, pending = yield from asyncio.wait(
+                    tasks,
+                    return_when=asyncio.FIRST_COMPLETED
+                )
+        # start the websocket server
+        ws_server = websockets.serve(handler, self.host, self.port)
+
+        asyncio.get_event_loop().run_until_complete(ws_server)
+        asyncio.get_event_loop().run_forever()
