@@ -6,7 +6,11 @@ import time
 # runs for each message sent by each client
 def handler(websocket):
     # wait for message
-    recv = yield from websocket.recv()
+    try:
+        recv = yield from websocket.recv()
+    except ConnectionClosed as e:
+        # the connection died. Do code
+        pass
     # send message
     yield from websocket.send(recv)
 
